@@ -1,12 +1,12 @@
 "use client";
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { DevStorage } from '@/lib/dev-storage';
+import { loginProvider } from '@/lib/api';
 
 interface Therapist {
     id: string;
-    firstName: string;
-    lastName: string;
+    firstname: string;
+    lastname: string;
     email?: string;
 }
 
@@ -28,23 +28,7 @@ export function TherapistProvider({ children }: { children: ReactNode }) {
     // Check for existing login on initial load
     useEffect(() => {
         if (typeof window !== 'undefined') {
-            // Initialize storage with demo data
-            DevStorage.initializeStorage();
-            
-            // Check for existing login session
-            const savedTherapistId = localStorage.getItem("currentTherapistId");
-            if (savedTherapistId) {
-                const therapistData = DevStorage.getTherapist(savedTherapistId);
-                if (therapistData) {
-                    setTherapistState({
-                        id: therapistData.therapist_id,
-                        firstName: therapistData.first_name,
-                        lastName: therapistData.last_name,
-                        email: therapistData.email
-                    });
-                }
-            }
-            
+            // Removed DevStorage.getTherapist logic on initial load
             setIsLoading(false);
         }
     }, []);
@@ -57,6 +41,21 @@ export function TherapistProvider({ children }: { children: ReactNode }) {
         setError(null);
 
         try {
+            // Try backend login first
+            try {
+                const provider = await loginProvider(credentials.id, credentials.password);
+                setTherapistState({
+                    id: provider.providerid,
+                    firstname: provider.firstname,
+                    lastname: provider.lastname,
+                    email: provider.email,
+                });
+                localStorage.setItem("currentTherapistId", credentials.id);
+                return true;
+            } catch (apiErr) {
+                // fallback to local/dummy logic below
+            }
+
             console.log('Attempting login with credentials:', credentials);
 
             // Check for dummy therapist first (ID: 101)
@@ -64,8 +63,8 @@ export function TherapistProvider({ children }: { children: ReactNode }) {
                 console.log('Logging in as dummy therapist');
                 setTherapistState({
                     id: '101',
-                    firstName: 'Default',
-                    lastName: 'Therapist'
+                    firstname: 'Default',
+                    lastname: 'Therapist'
                 });
                 // Save current therapist ID for session persistence
                 localStorage.setItem("currentTherapistId", credentials.id);
@@ -82,8 +81,8 @@ export function TherapistProvider({ children }: { children: ReactNode }) {
             if (storedTherapist && storedTherapist.password === credentials.password) {
                 setTherapistState({
                     id: storedTherapist.therapist_id,
-                    firstName: storedTherapist.first_name,
-                    lastName: storedTherapist.last_name,
+                    firstname: storedTherapist.first_name,
+                    lastname: storedTherapist.last_name,
                     email: storedTherapist.email
                 });
                 // Save current therapist ID for session persistence
@@ -111,7 +110,7 @@ export function TherapistProvider({ children }: { children: ReactNode }) {
             {/* Development mode - TODO: fix for Vite */}
             {true && therapist && (
                 <div className="fixed top-0 left-0 right-0 bg-yellow-100 text-yellow-800 p-2 text-center text-sm">
-                    🚧 DEVELOPMENT MODE: Using account ({therapist.firstName} {therapist.lastName})
+                    🚧 DEVELOPMENT MODE: Using account ({therapist.firstname} {therapist.lastname})
                 </div>
             )}
             {children}

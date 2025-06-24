@@ -5,25 +5,25 @@ import { motion } from "framer-motion"
 import { Link } from "react-router-dom"
 import { Search, ArrowLeft, Plus } from "lucide-react"
 import { CreatePatientModal } from "./create-patient-modal"
-import { DevStorage } from "@/lib/dev-storage"
+import { getPatients } from "@/lib/api"
 import { useNavigate } from "react-router-dom"
 
 interface PatientSelectionProps {
-  onSelectPatient: (patientId: string) => void
-  therapistId: string
+  onSelectPatient: (patientid: string) => void
+  providerid: string
 }
 
 interface Patient {
-  patient_id: string
-  first_name: string
-  last_name: string
+  patientid: string
+  firstname: string
+  lastname: string
   age?: number
   pronouns?: string
-  therapist_id: string
-  created_at?: string
+  providerid: string
+  createdat?: string
 }
 
-export function PatientSelection({ onSelectPatient, therapistId }: PatientSelectionProps) {
+export function PatientSelection({ onSelectPatient, providerid }: PatientSelectionProps) {
   const [searchQuery, setSearchQuery] = useState("")
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [patients, setPatients] = useState<Patient[]>([])
@@ -33,41 +33,35 @@ export function PatientSelection({ onSelectPatient, therapistId }: PatientSelect
 
   useEffect(() => {
     loadPatients()
-  }, [therapistId])
+  }, [providerid])
 
-  const loadPatients = () => {
+  const loadPatients = async () => {
     try {
       setError(null)
-      console.log('Loading patients for therapist:', therapistId)
-      
-      // Initialize storage first to ensure we have demo data
-      DevStorage.initializeStorage()
-      
-      // Get patients from DevStorage instead of API call
-      const patientData = DevStorage.getPatientsByTherapist(therapistId)
-      console.log('Received patient data from DevStorage:', patientData)
-        // Sort patients by last name, handling null/undefined cases
+      setIsLoading(true)
+      console.log('Loading patients for provider:', providerid)
+      // Fetch patients from backend API
+      const patientData = await getPatients(providerid)
+      console.log('Received patient data from API:', patientData)
+      // Sort patients by last name, handling null/undefined cases
       const sortedPatients = patientData.sort((a: any, b: any) => {
-        const aName = (a.last_name || '').toLowerCase()
-        const bName = (b.last_name || '').toLowerCase()
+        const aName = (a.lastname || '').toLowerCase()
+        const bName = (b.lastname || '').toLowerCase()
         return aName.localeCompare(bName)
       })
-      
-      console.log('Sorted patients:', sortedPatients)
       setPatients(sortedPatients)
     } catch (error) {
       console.error('Error loading patients:', error)
-      setError('Failed to load patients. Please try again.')
       setPatients([])
     } finally {
       setIsLoading(false)
     }
   }
 
-  const handlePatientCreated = (patientId: string) => {
+  const handlePatientCreated = (patientid: string) => {
     console.log('Patient created, reloading patients...')
     loadPatients()
-    onSelectPatient(patientId)
+    onSelectPatient(patientid)
   }
 
   const handlePatientDeleted = () => {
@@ -78,21 +72,21 @@ export function PatientSelection({ onSelectPatient, therapistId }: PatientSelect
 
   const filteredPatients = patients
     .filter((patient) => {
-      const fullName = `${patient.first_name || ''} ${patient.last_name || ''}`.toLowerCase()
+      const fullName = `${patient.firstname || ''} ${patient.lastname || ''}`.toLowerCase()
       return fullName.includes(searchQuery.toLowerCase())
     })
-    .filter((patient) => !!patient.patient_id)
+    .filter((patient) => !!patient.patientid)
 
   const getInitials = (patient: Patient) => {
-    const first = patient.first_name?.[0]?.toUpperCase() || ''
-    const last = patient.last_name?.[0]?.toUpperCase() || ''
+    const first = patient.firstname?.[0]?.toUpperCase() || ''
+    const last = patient.lastname?.[0]?.toUpperCase() || ''
     return `${first}${last}` || '?'
   }
 
   const getDisplayName = (patient: Patient) => {
-    const firstName = patient.first_name?.trim() || 'Unknown'
-    const lastName = patient.last_name?.trim() || ''
-    return `${firstName} ${lastName}`.trim()
+    const firstname = patient.firstname?.trim() || 'Unknown'
+    const lastname = patient.lastname?.trim() || ''
+    return `${firstname} ${lastname}`.trim()
   }
 
   return (
@@ -137,10 +131,10 @@ export function PatientSelection({ onSelectPatient, therapistId }: PatientSelect
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {filteredPatients.map((patient) => (
             <motion.div
-              key={patient.patient_id}
+              key={patient.patientid}
               className="bg-white rounded-2xl shadow-md p-5 cursor-pointer"
               whileHover={{ y: -5, boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)" }}
-              onClick={() => onSelectPatient(patient.patient_id)}
+              onClick={() => onSelectPatient(patient.patientid)}
             >
               <div className="flex items-start gap-4">
                 <div className="h-12 w-12 rounded-full bg-[#D8B4F0] flex items-center justify-center text-white font-medium">
@@ -156,7 +150,7 @@ export function PatientSelection({ onSelectPatient, therapistId }: PatientSelect
                     {patient.age && patient.pronouns ? ' • ' : ''}
                     {patient.pronouns ? patient.pronouns : ''}
                   </p>
-                  <p className="text-xs text-[#999]">Patient ID: {patient.patient_id}</p>
+                  <p className="text-xs text-[#999]">Patient ID: {patient.patientid}</p>
                 </div>
               </div>
             </motion.div>
@@ -169,7 +163,7 @@ export function PatientSelection({ onSelectPatient, therapistId }: PatientSelect
         isOpen={showCreateModal}
         onClose={() => setShowCreateModal(false)}
         onPatientCreated={handlePatientCreated}
-        therapistId={therapistId}
+        providerid={providerid}
       />
     </div>
   )

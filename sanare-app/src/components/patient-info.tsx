@@ -15,32 +15,34 @@ import { deletePatient } from "@/lib/api"
 import { useNavigate } from "react-router-dom"
 
 interface PatientInfoProps {
-  patientId: string
-  firstName: string
-  lastName: string
+  patientid: string
+  firstname: string
+  lastname: string
   age?: number
   pronouns?: string
+  email?: string
+  phone?: string
   onPatientDeleted?: () => void
 }
 
-export function PatientInfo({ patientId, firstName, lastName, age, pronouns, onPatientDeleted }: PatientInfoProps) {
+export function PatientInfo({ patientid, firstname, lastname, age, pronouns, email, phone, onPatientDeleted }: PatientInfoProps) {
   const [isExpanded, setIsExpanded] = useState(false)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
-  const [currentFirstName, setCurrentFirstName] = useState(firstName)
-  const [currentLastName, setCurrentLastName] = useState(lastName)
+  const [currentFirstname, setCurrentFirstname] = useState(firstname)
+  const [currentLastname, setCurrentLastname] = useState(lastname)
   const navigate = useNavigate()
 
-  const handleNameUpdated = (newFirstName: string, newLastName: string) => {
-    setCurrentFirstName(newFirstName)
-    setCurrentLastName(newLastName)
+  const handleNameUpdated = (newFirstname: string, newLastname: string) => {
+    setCurrentFirstname(newFirstname)
+    setCurrentLastname(newLastname)
   }
 
   const handleDelete = async () => {
     try {
       setIsDeleting(true)
-      await deletePatient(patientId)
+      await deletePatient(patientid)
       setIsDeleteModalOpen(false)
       if (onPatientDeleted) {
         onPatientDeleted()
@@ -61,14 +63,17 @@ export function PatientInfo({ patientId, firstName, lastName, age, pronouns, onP
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-3">
               <Avatar className="h-12 w-12">
-                <AvatarImage src="/placeholder.svg?height=48&width=48" alt={`${currentFirstName} ${currentLastName}`} />
-                <AvatarFallback>{`${currentFirstName[0]}${currentLastName[0]}`}</AvatarFallback>
+                <AvatarImage src="/placeholder.svg?height=48&width=48" alt={`${currentFirstname} ${currentLastname}`} />
+                <AvatarFallback>{`${currentFirstname[0]}${currentLastname[0]}`}</AvatarFallback>
               </Avatar>
               <div>
-                <CardTitle className="text-xl font-serif">{`${currentFirstName} ${currentLastName}`}</CardTitle>
+                <CardTitle className="text-xl font-serif">{`${currentFirstname} ${currentLastname}`}</CardTitle>
                 <CardDescription>
                   {age && pronouns ? `${age} • ${pronouns}` : age ? `${age}` : pronouns ? pronouns : ""}
                 </CardDescription>
+                <div className="text-xs text-[#999] mt-1">Patient ID: {patientid}</div>
+                {email && <div className="text-xs text-[#999]">Email: {email}</div>}
+                {phone && <div className="text-xs text-[#999]">Phone: {phone}</div>}
               </div>
             </div>
             <div className="flex gap-1">
@@ -207,14 +212,14 @@ export function PatientInfo({ patientId, firstName, lastName, age, pronouns, onP
       <EditPatientNameModal
         isOpen={isEditModalOpen}
         onClose={() => setIsEditModalOpen(false)}
-        patientId={patientId}
-        currentFirstName={currentFirstName}
-        currentLastName={currentLastName}
+        patientId={patientid}
+        currentFirstName={currentFirstname}
+        currentLastName={currentLastname}
         onNameUpdated={handleNameUpdated}
       />      <ConfirmationModal
         isOpen={isDeleteModalOpen}
         title="Delete Patient"
-        message={`Are you sure you want to delete ${currentFirstName} ${currentLastName}? This action cannot be undone.`}
+        message={`Are you sure you want to delete ${currentFirstname} ${currentLastname}? This action cannot be undone.`}
         confirmText={isDeleting ? "Deleting..." : "Delete"}
         onConfirm={handleDelete}
         onCancel={() => setIsDeleteModalOpen(false)}

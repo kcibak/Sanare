@@ -9,4 +9,14 @@ export default defineConfig({
       "@": "/src",
     },
   },
+  server: {
+    port: 5173, // Use 5173 for Vite frontend
+    proxy: {
+      '/api': {
+        target: 'http://localhost:3000', // Backend runs on 3000
+        changeOrigin: true,
+        secure: false,
+      },
+    },
+  },
 })

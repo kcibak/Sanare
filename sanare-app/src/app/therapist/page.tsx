@@ -46,7 +46,7 @@ export default function TherapistView() {
           >
             <PatientSelection 
               onSelectPatient={setSelectedPatient} 
-              therapistId={therapist.id}
+              providerid={therapist.id}
             />
           </motion.div>
         ) : (
@@ -58,7 +58,7 @@ export default function TherapistView() {
             transition={{ duration: 0.4, ease: "easeInOut" }}
             className="h-screen"
           >
-            <TherapistInterface patientId={selectedPatient} onBack={() => setSelectedPatient(null)} />
+            <TherapistInterface patientid={selectedPatient} onBack={() => setSelectedPatient(null)} />
           </motion.div>
         )}
       </AnimatePresence>

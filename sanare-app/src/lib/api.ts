@@ -1,84 +1,38 @@
-export async function getPatients(therapistId: string) {
+const API_URL = (import.meta as any).env.VITE_API_URL || '';
+
+export async function getPatients(providerid: string) {
   try {
-    console.log('Fetching patients for therapist:', therapistId);
-
-    // For localStorage therapists (those starting with 'T')
-    if (therapistId.startsWith('T')) {
-      const patients = JSON.parse(localStorage.getItem('patients') || '{}');
-      return patients[therapistId] || [];
+    console.log('Fetching patients for provider:', providerid);
+    const response = await fetch(`/api/v1/patients?providerid=${providerid}`);
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.error || 'Failed to fetch patients');
     }
-    
-    // For dummy therapist (101), use file system
-    if (therapistId === '101') {
-      const response = await fetch(`/api/patients?therapistId=${therapistId}`);
-      const data = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to fetch patients');
-      }
-      
-      return data.patients || [];
-    }
-
-    return [];
+    return data.patients || [];
   } catch (error) {
     console.error('Error in getPatients:', error);
     return [];
   }
 }
 
-export async function createPatient(firstName: string, lastName: string, therapistId: string) {
+export async function createPatient(firstname: string, lastname: string, providerid: string, phone?: string, email?: string) {
   try {
-    if (!firstName || !lastName || !therapistId) {
+    console.log('createPatient called with:', { firstname, lastname, providerid, phone, email });
+    if (!firstname || !lastname || !providerid || !email) {
+      console.error('Missing fields:', { firstname, lastname, providerid, email });
       throw new Error('Missing required fields');
     }
-
-    // For localStorage therapists (those starting with 'T')
-    if (therapistId.startsWith('T')) {
-      const patientId = `P${Date.now()}`;
-      const newPatient = {
-        patient_id: patientId,
-        first_name: firstName,
-        last_name: lastName,
-        therapist_id: therapistId,
-        created_at: new Date().toISOString()
-      };
-
-      // Get existing patients
-      const patients = JSON.parse(localStorage.getItem('patients') || '{}');
-      if (!patients[therapistId]) {
-        patients[therapistId] = [];
-      }
-      
-      // Add new patient
-      patients[therapistId].push(newPatient);
-      
-      // Save back to localStorage
-      localStorage.setItem('patients', JSON.stringify(patients));
-      
-      return { patientId };
+    // Always call backend for patient creation
+    const response = await fetch('/api/v1/patients', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ firstname, lastname, providerid, phone, email }),
+    });
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.error || 'Failed to create patient');
     }
-    
-    // For dummy therapist (101), use file system
-    if (therapistId === '101') {
-      const response = await fetch('/api/patients', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ firstName, lastName, therapistId }),
-      });
-      
-      const data = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to create patient');
-      }
-      
-      return data;
-    }
-
-    throw new Error('Invalid therapist ID');
+    return data;
   } catch (error) {
     console.error('Error in createPatient:', error);
     throw error;
@@ -146,4 +100,73 @@ export async function deletePatient(patientId: string) {
     console.error('Error in deletePatient:', error)
     throw error
   }
-} 
+}
+
+export async function createProvider(firstname: string, lastname: string, email: string, password: string) {
+  try {
+    if (!firstname || !lastname || !email || !password) {
+      throw new Error('Missing required fields');
+    }
+    const response = await fetch('/api/v1/providers', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ firstname, lastname, email, password }),
+    });
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.error || 'Failed to create provider');
+    }
+    return data;
+  } catch (error) {
+    console.error('Error in createProvider:', error);
+    throw error;
+  }
+}
+
+export async function loginProvider(providerid: string, password: string) {
+  try {
+    const response = await fetch('/api/v1/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ providerid, password }),
+    });
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.error || 'Login failed');
+    }
+    return data.provider;
+  } catch (error) {
+    console.error('Error in loginProvider:', error);
+    throw error;
+  }
+}
+
+export async function getPatient(patientid: string) {
+  try {
+    const response = await fetch(`/api/v1/patients/${patientid}`);
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.error || 'Failed to fetch patient');
+    }
+    return data.patient;
+  } catch (error) {
+    console.error('Error in getPatient:', error);
+    return null;
+  }
+}
+
+export async function getPatientNotes(patientid: string) {
+  try {
+    const response = await fetch(`/api/v1/patients/${patientid}/notes`);
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.error || 'Failed to fetch notes');
+    }
+    return data.notes || [];
+  } catch (error) {
+    console.error('Error in getPatientNotes:', error);
+    return [];
+  }
+}

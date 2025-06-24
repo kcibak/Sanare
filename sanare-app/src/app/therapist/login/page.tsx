@@ -9,13 +9,13 @@ import { Button } from "@/components/ui/button"
 import { Link } from "react-router-dom"
 import { ArrowLeft, X } from "lucide-react"
 import { z } from "zod"
-import { createTherapist } from "@/lib/api"
+import { createTherapist, createProvider } from "@/lib/api"
 import { DevStorage } from "@/lib/dev-storage"
 
 // Add registration schema
 const baseRegistrationSchema = z.object({
-  firstName: z.string().min(2, "First name must be at least 2 characters"),
-  lastName: z.string().min(2, "Last name must be at least 2 characters"),
+  firstname: z.string().min(2, "First name must be at least 2 characters"),
+  lastname: z.string().min(2, "Last name must be at least 2 characters"),
   email: z.string().email("Invalid email address"),
   password: z.string().min(8, "Password must be at least 8 characters")
     .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
@@ -41,8 +41,8 @@ export default function TherapistLogin() {
   // Add registration state
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
+    firstname: "",
+    lastname: "",
     email: "",
     password: "",
     confirmPassword: ""
@@ -110,10 +110,10 @@ export default function TherapistLogin() {
           }));
         }      } else {
         // For other fields, validate individual field
-        if (field === 'firstName') {
-          baseRegistrationSchema.shape.firstName.parse(value);
-        } else if (field === 'lastName') {
-          baseRegistrationSchema.shape.lastName.parse(value);
+        if (field === 'firstname') {
+          baseRegistrationSchema.shape.firstname.parse(value);
+        } else if (field === 'lastname') {
+          baseRegistrationSchema.shape.lastname.parse(value);
         } else if (field === 'email') {
           baseRegistrationSchema.shape.email.parse(value);
         }
@@ -138,8 +138,8 @@ export default function TherapistLogin() {
   // Add a reset function for the registration form
   const resetRegistrationForm = () => {
     setFormData({
-      firstName: "",
-      lastName: "",
+      firstname: "",
+      lastname: "",
       email: "",
       password: "",
       confirmPassword: ""
@@ -161,60 +161,32 @@ export default function TherapistLogin() {
     try {
       // First validate the form data
       const validatedData = registrationSchema.parse(formData);
-      
-      // Generate a new therapist ID
-      const therapistId = `T${Date.now()}`;
-      console.log('Registration - Generated new therapist ID:', therapistId);
-      
-      // Create the therapist data
-      const newTherapist = {
-        therapist_id: therapistId,
-        first_name: validatedData.firstName,
-        last_name: validatedData.lastName,
-        password: validatedData.password,
-        email: validatedData.email,
-        created_at: new Date().toISOString()
-      };
-      
-      console.log('Registration - About to save therapist:', newTherapist);
-      
-      // Save the new therapist
-      const saved = DevStorage.saveTherapist(newTherapist);
-      console.log('Registration - Save result:', saved);
 
-      // Immediately verify the save
-      const storedTherapists = JSON.parse(localStorage.getItem('therapists') || '{}');
-      console.log('Registration - All stored therapists:', storedTherapists);
-      
-      // Show the created therapist ID to the user
-      alert(`Your Provider ID is: ${therapistId}\nPlease save this ID for logging in.`);
+      // Call backend API to create provider
+      const provider = await createProvider(
+        validatedData.firstname,
+        validatedData.lastname,
+        validatedData.email,
+        validatedData.password
+      );
 
-      // Log in with the new account
-      console.log('Registration - Attempting immediate login with:', { id: therapistId, password: validatedData.password });
-      const success = await setTherapist({
-        id: therapistId,
-        password: validatedData.password
-      });      if (success) {
-        setShowCreateModal(false);
-        navigate('/therapist');
-      } else {
-        throw new Error("Failed to log in with new account");
-      }
-    } catch (error) {
-      console.error('Registration error:', error);
-      if (error instanceof z.ZodError) {
-        const formattedErrors: Record<string, string> = {};
-        error.errors.forEach(err => {
-          if (err.path[0]) {
-            formattedErrors[err.path[0]] = err.message;
-          }
-        });
-        setRegistrationErrors(formattedErrors);
-      } else {
-        setRegistrationErrors({
-          form: error instanceof Error ? error.message : "Failed to create account"
-        });
-      }
+      // Show the created provider ID to the user
+      alert(`Your Provider ID is: ${provider.providerid}\nPlease save this ID for logging in.`);
+
+      // Log in with the new account (if desired)
+      // You may want to setTherapist and navigate as before, using providerid and password
+      // Example:
+      // const success = await setTherapist({ id: provider.providerid, password: validatedData.password });
+      // if (success) {
+      //   setShowCreateModal(false);
+      //   navigate('/therapist');
+      // } else {
+      //   setRegistrationErrors({ general: 'Auto-login failed. Please log in manually.' });
+      // }
+      setShowCreateModal(false);
+      resetRegistrationForm();
+    } catch (error: any) {
+      setRegistrationErrors({ general: error.message || 'Registration failed' });
     } finally {
       setIsRegistering(false);
     }
@@ -369,8 +341,8 @@ export default function TherapistLogin() {
                   <Input
                     id="firstName"
                     type="text"
-                    value={formData.firstName}
-                    onChange={handleInputChange("firstName")}
+                    value={formData.firstname}
+                    onChange={handleInputChange("firstname")}
                     placeholder="Enter your first name"
                     className={registrationErrors.firstName ? "border-red-500" : ""}
                   />
@@ -386,8 +358,8 @@ export default function TherapistLogin() {
                   <Input
                     id="lastName"
                     type="text"
-                    value={formData.lastName}
-                    onChange={handleInputChange("lastName")}
+                    value={formData.lastname}
+                    onChange={handleInputChange("lastname")}
                     placeholder="Enter your last name"
                     className={registrationErrors.lastName ? "border-red-500" : ""}
                   />

@@ -1,0 +1,18 @@
+{
+  "realm": "sanare",
+  "enabled": true,
+  "roles": {
+    "realm": [
+      { "name": "therapist" },
+      { "name": "patient" }
+    ]
+  },
+  "clients": [
+    {
+      "clientId": "sanare-app",
+      "enabled": true,
+      "publicClient": true,
+      "redirectUris": ["*"]
+    }
+  ]
+}

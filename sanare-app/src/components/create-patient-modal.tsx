@@ -9,16 +9,20 @@ interface CreatePatientModalProps {
   isOpen: boolean
   onClose: () => void
   onPatientCreated: (patientId: string) => void
-  therapistId: string
+  providerid: string
 }
 
-export function CreatePatientModal({ isOpen, onClose, onPatientCreated, therapistId }: CreatePatientModalProps) {
-  const [firstName, setFirstName] = useState("")
-  const [lastName, setLastName] = useState("")
+export function CreatePatientModal({ isOpen, onClose, onPatientCreated, providerid }: CreatePatientModalProps) {
+  const [firstname, setFirstname] = useState("")
+  const [lastname, setLastname] = useState("")
+  const [phone, setPhone] = useState("")
+  const [email, setEmail] = useState("")
   const [error, setError] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [firstNameError, setFirstNameError] = useState("")
-  const [lastNameError, setLastNameError] = useState("")
+  const [firstnameError, setFirstnameError] = useState("")
+  const [lastnameError, setLastnameError] = useState("")
+  const [phoneError, setPhoneError] = useState("")
+  const [emailError, setEmailError] = useState("")
 
   const validateName = (name: string, field: "firstName" | "lastName") => {
     const trimmedName = name.trim()
@@ -42,26 +46,55 @@ export function CreatePatientModal({ isOpen, onClose, onPatientCreated, therapis
     return ""
   }
 
+  const validatePhone = (value: string) => {
+    const trimmed = value.trim()
+    if (!trimmed) return "This field is required"
+    if (!/^\+?[0-9\-\s()]{7,20}$/.test(trimmed)) return "Invalid phone number format"
+    return ""
+  }
+
+  const validateEmail = (value: string) => {
+    const trimmed = value.trim()
+    if (!trimmed) return "This field is required"
+    // Simple email regex
+    if (!/^\S+@\S+\.\S+$/.test(trimmed)) return "Invalid email address"
+    return ""
+  }
+
   const validateInputs = () => {
-    const firstNameValidation = validateName(firstName, "firstName")
-    const lastNameValidation = validateName(lastName, "lastName")
-    
-    setFirstNameError(firstNameValidation)
-    setLastNameError(lastNameValidation)
-    
-    return !firstNameValidation && !lastNameValidation
+    const firstnameValidation = validateName(firstname, "firstName")
+    const lastnameValidation = validateName(lastname, "lastName")
+    const phoneValidation = validatePhone(phone)
+    const emailValidation = validateEmail(email)
+    setFirstnameError(firstnameValidation)
+    setLastnameError(lastnameValidation)
+    setPhoneError(phoneValidation)
+    setEmailError(emailValidation)
+    return !firstnameValidation && !lastnameValidation && !phoneValidation && !emailValidation
   }
 
-  const handleFirstNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFirstnameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value
-    setFirstName(value)
-    setFirstNameError(validateName(value, "firstName"))
+    setFirstname(value)
+    setFirstnameError(validateName(value, "firstName"))
   }
 
-  const handleLastNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleLastnameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value
-    setLastName(value)
-    setLastNameError(validateName(value, "lastName"))
+    setLastname(value)
+    setLastnameError(validateName(value, "lastName"))
+  }
+
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value
+    setPhone(value)
+    setPhoneError(validatePhone(value))
+  }
+
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value
+    setEmail(value)
+    setEmailError(validateEmail(value))
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -72,8 +105,9 @@ export function CreatePatientModal({ isOpen, onClose, onPatientCreated, therapis
 
     setIsSubmitting(true)
     try {
-      const { patientId } = await createPatient(firstName.trim(), lastName.trim(), therapistId)
-      onPatientCreated(patientId)
+      console.log('Submitting patient with providerid:', providerid);
+      const { patientid } = await createPatient(firstname.trim(), lastname.trim(), providerid, phone.trim(), email.trim())
+      onPatientCreated(patientid)
       onClose()
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Failed to create patient. Please try again."
@@ -83,7 +117,7 @@ export function CreatePatientModal({ isOpen, onClose, onPatientCreated, therapis
     }
   }
 
-  const isFormValid = !firstNameError && !lastNameError && firstName.trim().length >= 2 && lastName.trim().length >= 2 && !isSubmitting
+  const isFormValid = !firstnameError && !lastnameError && !phoneError && !emailError && firstname.trim().length >= 2 && lastname.trim().length >= 2 && phone.trim().length > 0 && email.trim().length > 0 && !isSubmitting
 
   return (
     <AnimatePresence>
@@ -111,40 +145,80 @@ export function CreatePatientModal({ isOpen, onClose, onPatientCreated, therapis
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label htmlFor="firstName" className="block text-sm font-medium mb-1">
+                <label htmlFor="firstname" className="block text-sm font-medium mb-1">
                   First Name
                 </label>
                 <input
-                  id="firstName"
+                  id="firstname"
                   type="text"
-                  value={firstName}
-                  onChange={handleFirstNameChange}
+                  value={firstname}
+                  onChange={handleFirstnameChange}
                   className={`w-full p-2 border rounded-lg focus:outline-none focus:ring-2 ${
-                    firstNameError ? "border-red-500 focus:ring-red-500" : "focus:ring-[#D8B4F0]"
+                    firstnameError ? "border-red-500 focus:ring-red-500" : "focus:ring-[#D8B4F0]"
                   }`}
                   disabled={isSubmitting}
                 />
-                {firstNameError && (
-                  <div className="text-red-500 text-sm mt-1">{firstNameError}</div>
+                {firstnameError && (
+                  <div className="text-red-500 text-sm mt-1">{firstnameError}</div>
                 )}
               </div>
 
               <div>
-                <label htmlFor="lastName" className="block text-sm font-medium mb-1">
+                <label htmlFor="lastname" className="block text-sm font-medium mb-1">
                   Last Name
                 </label>
                 <input
-                  id="lastName"
+                  id="lastname"
                   type="text"
-                  value={lastName}
-                  onChange={handleLastNameChange}
+                  value={lastname}
+                  onChange={handleLastnameChange}
                   className={`w-full p-2 border rounded-lg focus:outline-none focus:ring-2 ${
-                    lastNameError ? "border-red-500 focus:ring-red-500" : "focus:ring-[#D8B4F0]"
+                    lastnameError ? "border-red-500 focus:ring-red-500" : "focus:ring-[#D8B4F0]"
                   }`}
                   disabled={isSubmitting}
                 />
-                {lastNameError && (
-                  <div className="text-red-500 text-sm mt-1">{lastNameError}</div>
+                {lastnameError && (
+                  <div className="text-red-500 text-sm mt-1">{lastnameError}</div>
+                )}
+              </div>
+
+              <div>
+                <label htmlFor="phone" className="block text-sm font-medium mb-1">
+                  Phone Number
+                </label>
+                <input
+                  id="phone"
+                  type="tel"
+                  value={phone}
+                  onChange={handlePhoneChange}
+                  className={`w-full p-2 border rounded-lg focus:outline-none focus:ring-2 ${
+                    phoneError ? "border-red-500 focus:ring-red-500" : "focus:ring-[#D8B4F0]"
+                  }`}
+                  disabled={isSubmitting}
+                  placeholder="e.g. +1 555-123-4567"
+                />
+                {phoneError && (
+                  <div className="text-red-500 text-sm mt-1">{phoneError}</div>
+                )}
+              </div>
+
+              <div>
+                <label htmlFor="email" className="block text-sm font-medium mb-1">
+                  Email
+                </label>
+                <input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={handleEmailChange}
+                  className={`w-full p-2 border rounded-lg focus:outline-none focus:ring-2 ${
+                    emailError ? "border-red-500 focus:ring-red-500" : "focus:ring-[#D8B4F0]"
+                  }`}
+                  disabled={isSubmitting}
+                  placeholder="e.g. patient@email.com"
+                />
+                {emailError && (
+                  <div className="text-red-500 text-sm mt-1">{emailError}</div>
                 )}
               </div>
 
@@ -169,4 +243,4 @@ export function CreatePatientModal({ isOpen, onClose, onPatientCreated, therapis
       )}
     </AnimatePresence>
   )
-} 
+}
