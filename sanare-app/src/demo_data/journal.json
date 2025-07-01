@@ -1,0 +1,19 @@
+{
+"journal": [
+	{
+		"entryid" : "984984b5",
+		"patientid" : "65774788",
+		"title" : "First Morning Win",
+		"content" : "Tried the new morning routine today. Didn’t check my phone right away and instead sat outside for 10 minutes with coffee. It felt surprisingly calming. I think I want to try stretching next time. Small step, but felt good.",
+		"createdat" : "2025-07-01T18:24:00.755Z",
+		"updatedat" : "2025-07-01T18:24:00.755Z"
+	},
+	{
+		"entryid" : "27a7c9b7",
+		"patientid" : "65774788",
+		"title" : "Unexpected Benefit",
+		"content" : "It’s only been a few days, but I’ve noticed I’m less anxious in the mornings. Not being bombarded by notifications immediately helps a lot. Also gives me time to breathe before the day starts. Didn’t expect such a quick shift.",
+		"createdat" : "2025-07-01T18:24:14.003Z",
+		"updatedat" : "2025-07-01T18:24:14.003Z"
+	}
+]}

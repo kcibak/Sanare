@@ -1,0 +1,23 @@
+{
+"goals": [
+	{
+		"goalid" : "f5a5810b",
+		"patientid" : "65774788",
+		"title" : "Build a Healthier Morning Routine",
+		"description" : "Start each day with a short activity that promotes focus and self-awareness. The goal is to increase structure and positivity in the first 30 minutes of my day.",
+		"iscomplete" : false,
+		"createdat" : "2025-06-30T23:34:17.733Z",
+		"updatedat" : "2025-06-30T23:34:17.733Z",
+		"completedat" : null
+	},
+	{
+		"goalid" : "d2a4d309",
+		"patientid" : "65774788",
+		"title" : "Rediscover Joy Through Hobbies",
+		"description" : "Set aside time weekly to engage in hobbies that bring you joy. The goal is to reconnect with personal interests and foster a sense of play and creativity.",
+		"iscomplete" : false,
+		"createdat" : "2025-07-01T04:17:12.115Z",
+		"updatedat" : "2025-07-01T04:17:12.115Z",
+		"completedat" : null
+	}
+]}

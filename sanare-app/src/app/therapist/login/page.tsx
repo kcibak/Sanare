@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Link } from "react-router-dom"
 import { ArrowLeft, X } from "lucide-react"
 import { z } from "zod"
-import { createTherapist, createProvider, loginProvider } from "@/lib/api"
+import { createProvider, loginProvider } from "@/lib/api"
 import { useTherapist } from '@/lib/context/therapist-context';
 
 // Add registration schema
@@ -202,7 +202,8 @@ export default function TherapistLogin() {
             <div className="bg-[#D8B4F0] text-white rounded-xl px-4 py-2 mb-2 text-center text-base font-semibold shadow-md">
               <span>Demo Provider</span><br />
               <span>ID: <span className="font-mono">28279240</span></span><br />
-              <span>Password: <span className="font-mono">Test123!</span></span>
+              <span>Password: <span className="font-mono">Test123!</span></span><br />
+              <span className="block mt-1 text-xs text-yellow-200 font-bold">Demo Mode: No data is saved</span>
             </div>
           </div>
           <form

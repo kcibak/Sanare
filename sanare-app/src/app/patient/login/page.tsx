@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { motion, AnimatePresence } from "framer-motion"
 import { Input } from "@/components/ui/input"
@@ -141,7 +141,8 @@ export default function PatientLogin() {
             <div className="bg-[#B4F0E0] text-[#333] rounded-xl px-4 py-2 mb-2 text-center text-base font-semibold shadow-md">
               <span>Demo Patient</span><br />
               <span>ID: <span className="font-mono">65774788</span></span><br />
-              <span>Password: <span className="font-mono">Test321!</span></span>
+              <span>Password: <span className="font-mono">Test321!</span></span><br />
+              <span className="block mt-1 text-xs text-yellow-700 font-bold">Demo Mode: No data is saved</span>
             </div>
           </div>
           <form

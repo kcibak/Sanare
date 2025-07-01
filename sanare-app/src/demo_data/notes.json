@@ -1,0 +1,27 @@
+{
+"notes": [
+	{
+		"noteid" : "8665d84a",
+		"patientid" : "65774788",
+		"notecontent" : "Patient appeared open and friendly during the initial consultation. We discussed general well-being, daily habits, and interests. Based on the patient’s input, we decided to begin with a small, achievable goal related to morning routine improvement. No concerns raised that need urgent attention. Plan is to establish trust and build momentum with simple wins before introducing deeper behavioral strategies.",
+		"notetitle" : "First Consultation",
+		"comments" : null,
+		"sessiondate" : "2025-07-01",
+		"createdat" : "2025-07-01T18:02:28.874Z",
+		"updatedat" : "2025-07-01T18:02:47.412Z",
+		"isshared" : false,
+		"ack" : false
+	},
+	{
+		"noteid" : "8774032e",
+		"patientid" : "65774788",
+		"notecontent" : "We had our first session today. It was a relaxed conversation where we explored your current routine and talked about small, meaningful changes. You expressed interest in becoming more intentional with your mornings, so we decided on a light, simple goal to build momentum.",
+		"notetitle" : "First Consultation",
+		"comments" : "[{\"content\":\"This feels manageable! I like the idea of starting small.\",\"createdAt\":\"2025-07-01T14:05:30.126Z\",\"author\":\"patient\"},{\"content\":\"That’s great to hear! Let’s use this as a foundation and we’ll build from there over the next few weeks.\",\"createdAt\":\"2025-07-01T14:08:39.454Z\",\"author\":\"provider\"},{\"content\":\"I’ll let you know how it goes — thanks for making this feel low-pressure.\",\"createdAt\":\"2025-07-01T14:08:53.743Z\",\"author\":\"patient\"}]",
+		"sessiondate" : "2025-07-01",
+		"createdat" : "2025-07-01T18:03:49.572Z",
+		"updatedat" : "2025-07-01T18:04:10.079Z",
+		"isshared" : true,
+		"ack" : true
+	}
+]}

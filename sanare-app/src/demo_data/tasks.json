@@ -1,0 +1,43 @@
+{
+"tasks": [
+	{
+		"taskid" : "1a1ae52d",
+		"goalid" : "f5a5810b",
+		"title" : "Wake up by 8:00 AM each weekday",
+		"iscompleted" : false,
+		"createdat" : "2025-07-01T04:14:54.219Z",
+		"updatedat" : "2025-07-01T04:14:54.219Z"
+	},
+	{
+		"taskid" : "b4b2f885",
+		"goalid" : "f5a5810b",
+		"title" : "Avoid checking phone for first 15 minutes",
+		"iscompleted" : true,
+		"createdat" : "2025-07-01T04:14:54.220Z",
+		"updatedat" : "2025-07-01T04:14:54.220Z"
+	},
+	{
+		"taskid" : "75328743",
+		"goalid" : "d2a4d309",
+		"title" : "Choose one hobby to focus on this week",
+		"iscompleted" : true,
+		"createdat" : "2025-07-01T04:17:53.521Z",
+		"updatedat" : "2025-07-01T04:17:53.521Z"
+	},
+	{
+		"taskid" : "9ea6d80b",
+		"goalid" : "d2a4d309",
+		"title" : "Spend at least 30 minutes on the hobby twice this week",
+		"iscompleted" : false,
+		"createdat" : "2025-07-01T04:17:53.521Z",
+		"updatedat" : "2025-07-01T04:17:53.521Z"
+	},
+	{
+		"taskid" : "9f96707a",
+		"goalid" : "f5a5810b",
+		"title" : "Do one mindfulness activity (stretching, journaling, or deep breathing)",
+		"iscompleted" : false,
+		"createdat" : "2025-07-01T04:14:54.220Z",
+		"updatedat" : "2025-07-01T04:14:54.220Z"
+	}
+]}

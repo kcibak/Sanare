@@ -1,0 +1,13 @@
+{
+"patient": [
+	{
+		"patientid" : "65774788",
+		"firstname" : "Demo",
+		"lastname" : "Patient",
+		"email" : "patient@mail.com",
+		"providerid" : "28279240",
+		"password" : "Test321!",
+		"createdat" : "2025-06-27T22:04:13.713Z",
+		"dob" : "1111-11-11"
+	}
+]}

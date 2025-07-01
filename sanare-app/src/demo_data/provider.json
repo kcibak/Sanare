@@ -1,0 +1,11 @@
+{
+"provider": [
+	{
+		"providerid" : "28279240",
+		"firstname" : "Demo",
+		"lastname" : "Provider",
+		"email" : "test@mail.com",
+		"password" : "Test123!",
+		"createdat" : "2025-06-27T21:46:42.277Z"
+	}
+]}
