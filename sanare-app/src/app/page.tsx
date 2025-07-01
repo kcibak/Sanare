@@ -97,7 +97,9 @@ export default function HomePage() {
             {hoverPatient && <p className="mt-2 text-sm text-[#333]/80">Track progress and feelings</p>}
           </Link>
         </div>
-      </div>      <div className="absolute bottom-4 text-center text-sm text-[#555]">
+      </div>
+      {/* Removed demo mode indicator if present */}
+      <div className="absolute bottom-4 text-center text-sm text-[#555]">
         <p>A safe space for your mental health journey</p>
       </div>
     </main>

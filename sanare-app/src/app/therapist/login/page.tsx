@@ -1,16 +1,15 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect, useRef } from "react"
 import { useNavigate } from "react-router-dom"
 import { motion, AnimatePresence } from "framer-motion"
-import { useTherapist } from "@/lib/context/therapist-context"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Link } from "react-router-dom"
 import { ArrowLeft, X } from "lucide-react"
 import { z } from "zod"
-import { createTherapist, createProvider } from "@/lib/api"
-import { DevStorage } from "@/lib/dev-storage"
+import { createTherapist, createProvider, loginProvider } from "@/lib/api"
+import { useTherapist } from '@/lib/context/therapist-context';
 
 // Add registration schema
 const baseRegistrationSchema = z.object({
@@ -32,7 +31,7 @@ const registrationSchema = baseRegistrationSchema.refine((data) => data.password
 
 export default function TherapistLogin() {
   const navigate = useNavigate()
-  const { setTherapist } = useTherapist()
+  const { setTherapist } = useTherapist();
   const [therapistId, setTherapistId] = useState("")
   const [password, setPassword] = useState("")
   const [error, setError] = useState("")
@@ -49,33 +48,16 @@ export default function TherapistLogin() {
   })
   const [registrationErrors, setRegistrationErrors] = useState<Record<string, string>>({})
   const [isRegistering, setIsRegistering] = useState(false)
+  const [showProviderIdModal, setShowProviderIdModal] = useState(false);
+  const [newProviderId, setNewProviderId] = useState("");
+  const [newProviderName, setNewProviderName] = useState("");
+  const [pendingProvider, setPendingProvider] = useState<{ id: string, password: string } | null>(null);
+  const providerIdInputRef = useRef<HTMLInputElement>(null);
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setError("")
-    setIsLoading(true)
-
-    console.log('Login - Attempting with:', { therapistId, password });
-    const storedTherapists = JSON.parse(localStorage.getItem('therapists') || '{}');
-    console.log('Login - All stored therapists:', storedTherapists);
-
-    try {      const success = await setTherapist({
-        id: therapistId,
-        password: password
-      });
-      
-      if (success) {
-        navigate('/therapist')
-      } else {
-        setError("Invalid credentials. Please try again.")
-      }
-    } catch (error) {
-      console.error('Login error:', error);
-      setError("An error occurred during login. Please try again.")
-    } finally {
-      setIsLoading(false)
-    }
-  }
+  // Redirect if already authenticated
+  useEffect(() => {
+    // TODO: Check therapist authentication status
+  }, [])
 
   // Add registration handlers
   const validateField = (field: string, value: string) => {
@@ -155,34 +137,23 @@ export default function TherapistLogin() {
   }
 
   const handleRegistration = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsRegistering(true)
-
+    e.preventDefault();
+    setIsRegistering(true);
     try {
       // First validate the form data
       const validatedData = registrationSchema.parse(formData);
-
       // Call backend API to create provider
-      const provider = await createProvider(
+      const result = await createProvider(
         validatedData.firstname,
         validatedData.lastname,
         validatedData.email,
         validatedData.password
       );
-
-      // Show the created provider ID to the user
-      alert(`Your Provider ID is: ${provider.providerid}\nPlease save this ID for logging in.`);
-
-      // Log in with the new account (if desired)
-      // You may want to setTherapist and navigate as before, using providerid and password
-      // Example:
-      // const success = await setTherapist({ id: provider.providerid, password: validatedData.password });
-      // if (success) {
-      //   setShowCreateModal(false);
-      //   navigate('/therapist');
-      // } else {
-      //   setRegistrationErrors({ general: 'Auto-login failed. Please log in manually.' });
-      // }
+      const provider = result.provider;
+      setNewProviderId(provider.providerid);
+      setNewProviderName(`${provider.firstname} ${provider.lastname}`);
+      setPendingProvider({ id: provider.providerid, password: validatedData.password });
+      setShowProviderIdModal(true);
       setShowCreateModal(false);
       resetRegistrationForm();
     } catch (error: any) {
@@ -190,7 +161,7 @@ export default function TherapistLogin() {
     } finally {
       setIsRegistering(false);
     }
-  }
+  };
 
   return (
     <main className="min-h-screen flex flex-col items-center justify-center p-4 relative overflow-hidden">      {/* Background shapes - Fixed visibility */}
@@ -224,26 +195,46 @@ export default function TherapistLogin() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg p-8"
+          className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg p-8 max-w-md w-full"
         >
-          <h1 className="text-3xl font-handwritten text-center mb-6 text-[#333]">Welcome</h1>
-          
-          <form onSubmit={handleLogin} className="space-y-4">
+          <h1 className="text-3xl font-handwritten text-center mb-6 text-[#333]">Provider Login</h1>
+          <div className="w-full flex flex-col items-center mb-6">
+            <div className="bg-[#D8B4F0] text-white rounded-xl px-4 py-2 mb-2 text-center text-base font-semibold shadow-md">
+              <span>Demo Provider</span><br />
+              <span>ID: <span className="font-mono">28279240</span></span><br />
+              <span>Password: <span className="font-mono">Test123!</span></span>
+            </div>
+          </div>
+          <form
+            onSubmit={async (e) => {
+              e.preventDefault();
+              setIsLoading(true);
+              setError("");
+              try {
+                const provider = await loginProvider(therapistId, password);
+                setTherapist(provider);
+                navigate('/dashboard');
+              } catch (err: any) {
+                setError(err.message || 'Login failed');
+              } finally {
+                setIsLoading(false);
+              }
+            }}
+            className="space-y-4"
+          >
             <div>
               <label htmlFor="therapistId" className="block text-sm font-medium text-gray-700 mb-1">
                 Provider ID
               </label>
               <Input
                 id="therapistId"
-                type="text"
                 value={therapistId}
-                onChange={(e) => setTherapistId(e.target.value)}
-                placeholder="Enter your provider ID"
+                onChange={e => setTherapistId(e.target.value)}
                 required
                 className="w-full bg-white/70 backdrop-blur-sm border-0 focus:ring-2 focus:ring-[#D8B4F0]"
+                placeholder="Enter your provider ID"
               />
             </div>
-
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
                 Password
@@ -252,13 +243,12 @@ export default function TherapistLogin() {
                 id="password"
                 type="password"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter your password"
+                onChange={e => setPassword(e.target.value)}
                 required
                 className="w-full bg-white/70 backdrop-blur-sm border-0 focus:ring-2 focus:ring-[#D8B4F0]"
+                placeholder="Enter your password"
               />
             </div>
-
             {error && (
               <motion.div 
                 initial={{ opacity: 0, y: -10 }}
@@ -268,18 +258,16 @@ export default function TherapistLogin() {
                 {error}
               </motion.div>
             )}
-
             <Button
               type="submit"
               className="w-full bg-[#D8B4F0] hover:bg-[#D8B4F0]/90 text-white transition-all duration-200 transform hover:scale-[1.02]"
-              disabled={isLoading || password.length < 8}
+              disabled={isLoading}
             >
               {isLoading ? "Signing in..." : "Sign In"}
             </Button>
-
             <div className="mt-4 text-center">
               <p className="text-sm text-gray-600">
-                Don't have an account?{" "}
+                Don't have an account?{' '}
                 <button
                   type="button"
                   onClick={() => setShowCreateModal(true)}
@@ -290,22 +278,6 @@ export default function TherapistLogin() {
               </p>
             </div>
           </form>
-
-          {/* Development mode detection - TODO: fix for Vite */}
-          {true && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.5 }}
-              className="mt-4 p-4 bg-yellow-50/80 backdrop-blur-sm rounded-lg"
-            >
-              <p className="text-yellow-800 text-sm">
-                Development Mode Credentials:<br />
-                ID: 101<br />
-                Password: therapy123
-              </p>
-            </motion.div>
-          )}
         </motion.div>
       </div>
 
@@ -344,7 +316,7 @@ export default function TherapistLogin() {
                     value={formData.firstname}
                     onChange={handleInputChange("firstname")}
                     placeholder="Enter your first name"
-                    className={registrationErrors.firstName ? "border-red-500" : ""}
+                    className={registrationErrors.firstName ? "border-red-500 w-full bg-white/70 backdrop-blur-sm border-0 focus:ring-2 focus:ring-[#D8B4F0]" : "w-full bg-white/70 backdrop-blur-sm border-0 focus:ring-2 focus:ring-[#D8B4F0]"}
                   />
                   {registrationErrors.firstName && (
                     <p className="mt-1 text-sm text-red-500">{registrationErrors.firstName}</p>
@@ -361,7 +333,7 @@ export default function TherapistLogin() {
                     value={formData.lastname}
                     onChange={handleInputChange("lastname")}
                     placeholder="Enter your last name"
-                    className={registrationErrors.lastName ? "border-red-500" : ""}
+                    className={registrationErrors.lastName ? "border-red-500 w-full bg-white/70 backdrop-blur-sm border-0 focus:ring-2 focus:ring-[#D8B4F0]" : "w-full bg-white/70 backdrop-blur-sm border-0 focus:ring-2 focus:ring-[#D8B4F0]"}
                   />
                   {registrationErrors.lastName && (
                     <p className="mt-1 text-sm text-red-500">{registrationErrors.lastName}</p>
@@ -378,7 +350,7 @@ export default function TherapistLogin() {
                     value={formData.email}
                     onChange={handleInputChange("email")}
                     placeholder="Enter your email address"
-                    className={registrationErrors.email ? "border-red-500" : ""}
+                    className={registrationErrors.email ? "border-red-500 w-full bg-white/70 backdrop-blur-sm border-0 focus:ring-2 focus:ring-[#D8B4F0]" : "w-full bg-white/70 backdrop-blur-sm border-0 focus:ring-2 focus:ring-[#D8B4F0]"}
                   />
                   {registrationErrors.email && (
                     <p className="mt-1 text-sm text-red-500">{registrationErrors.email}</p>
@@ -395,7 +367,7 @@ export default function TherapistLogin() {
                     value={formData.password}
                     onChange={handleInputChange("password")}
                     placeholder="Enter your password"
-                    className={registrationErrors.password ? "border-red-500" : ""}
+                    className={registrationErrors.password ? "border-red-500 w-full bg-white/70 backdrop-blur-sm border-0 focus:ring-2 focus:ring-[#D8B4F0]" : "w-full bg-white/70 backdrop-blur-sm border-0 focus:ring-2 focus:ring-[#D8B4F0]"}
                   />
                   <div className="mt-1 text-xs text-gray-500">
                     Password must contain:
@@ -432,7 +404,7 @@ export default function TherapistLogin() {
                     value={formData.confirmPassword}
                     onChange={handleInputChange("confirmPassword")}
                     placeholder="Confirm your password"
-                    className={registrationErrors.confirmPassword ? "border-red-500" : ""}
+                    className={registrationErrors.confirmPassword ? "border-red-500 w-full bg-white/70 backdrop-blur-sm border-0 focus:ring-2 focus:ring-[#D8B4F0]" : "w-full bg-white/70 backdrop-blur-sm border-0 focus:ring-2 focus:ring-[#D8B4F0]"}
                   />
                   {registrationErrors.confirmPassword && (
                     <p className="mt-1 text-sm text-red-500">{registrationErrors.confirmPassword}</p>
@@ -447,6 +419,74 @@ export default function TherapistLogin() {
                   {isRegistering ? "Creating Account..." : "Create Account"}
                 </Button>
               </form>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Provider ID Modal */}
+      <AnimatePresence>
+        {showProviderIdModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50"
+          >
+            <motion.div
+              initial={{ scale: 0.95 }}
+              animate={{ scale: 1 }}
+              exit={{ scale: 0.95 }}
+              className="bg-white rounded-2xl shadow-lg p-6 w-full max-w-md relative"
+            >
+              <button
+                onClick={() => setShowProviderIdModal(false)}
+                className="absolute right-4 top-4 text-gray-400 hover:text-gray-600"
+              >
+                <X className="h-5 w-5" />
+              </button>
+              <h2 className="text-2xl font-handwritten mb-4 text-center">Account Created!</h2>
+              <p className="mb-2 text-center">Welcome, <span className="font-bold">{newProviderName}</span>!</p>
+              <p className="mb-2 text-center">Your Provider ID:</p>
+              <div className="flex items-center justify-center mb-4">
+                <input
+                  ref={providerIdInputRef}
+                  value={newProviderId}
+                  readOnly
+                  className="border rounded px-2 py-1 text-center font-mono w-40 mr-2"
+                  onFocus={e => e.target.select()}
+                />
+                <Button
+                  type="button"
+                  onClick={() => {
+                    if (providerIdInputRef.current) {
+                      providerIdInputRef.current.select();
+                      document.execCommand('copy');
+                    }
+                  }}
+                  className="ml-2"
+                >
+                  Copy
+                </Button>
+              </div>
+              <p className="text-xs text-gray-500 text-center mb-2">(You will be logged in and redirected to your dashboard.)</p>
+              <Button className="w-full mt-2" onClick={async () => {
+                if (pendingProvider) {
+                  try {
+                    const loggedIn = await loginProvider(pendingProvider.id, pendingProvider.password);
+                    setTherapist(loggedIn);
+                    setShowProviderIdModal(false);
+                    setPendingProvider(null);
+                    navigate('/dashboard');
+                  } catch (err) {
+                    setShowProviderIdModal(false);
+                    setPendingProvider(null);
+                    alert('Auto-login failed. Please log in manually.');
+                  }
+                }
+              }}>
+                Go to Dashboard
+              </Button>
             </motion.div>
           </motion.div>
         )}

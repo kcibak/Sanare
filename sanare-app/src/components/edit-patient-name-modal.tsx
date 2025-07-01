@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { useToast } from "@/components/ui/use-toast"
+import { useToast } from "@/hooks/use-toast"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -12,6 +12,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog"
+import { updatePatientName } from "@/lib/api"
 
 interface EditPatientNameModalProps {
   isOpen: boolean
@@ -52,20 +53,7 @@ export function EditPatientNameModal({
 
     try {
       // Update patient name in database
-      const response = await fetch(`/api/patients/${patientId}`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          first_name: firstName.trim(),
-          last_name: lastName.trim(),
-        }),
-      })
-
-      if (!response.ok) {
-        throw new Error("Failed to update patient name")
-      }
+      await updatePatientName(patientId, firstName.trim(), lastName.trim())
 
       // Update UI
       onNameUpdated(firstName.trim(), lastName.trim())
@@ -117,10 +105,10 @@ export function EditPatientNameModal({
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={onClose} disabled={isSubmitting}>
+            <Button onClick={onClose} disabled={isSubmitting} className="bg-transparent hover:bg-gray-100 text-gray-700 transition-colors shadow-none border-none">
               Cancel
             </Button>
-            <Button type="submit" disabled={isSubmitting}>
+            <Button type="submit" disabled={isSubmitting} className="bg-[#D8B4F0] text-white hover:bg-[#a06fd8] transition-colors">
               {isSubmitting ? "Saving..." : "Save Changes"}
             </Button>
           </DialogFooter>
@@ -128,4 +116,4 @@ export function EditPatientNameModal({
       </DialogContent>
     </Dialog>
   )
-} 
+}

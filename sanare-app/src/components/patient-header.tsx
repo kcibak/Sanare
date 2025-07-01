@@ -1,87 +1,43 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+import { LogOut } from "lucide-react"
+import { useNavigate, Link } from "react-router-dom"
 
-export function PatientHeader() {
+interface PatientHeaderProps {
+  patient?: {
+    id?: string;
+    firstname?: string;
+    lastname?: string;
+  };
+}
+
+export function PatientHeader({ patient }: PatientHeaderProps) {
+  const navigate = useNavigate();
   return (
-    <header className="border-b bg-white shadow-sm">
-      <div className="flex h-16 items-center px-4 md:px-6">
-        <div className="flex items-center gap-2 font-serif">
-          <div className="h-8 w-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-bold">
-            T
-          </div>
-          <span className="text-xl font-semibold text-secondary">TherapyFlow</span>
+    <header className="bg-white shadow w-full">
+      <div className="flex flex-row items-center justify-between w-full px-6 py-4">
+        <div className="flex flex-col items-start">
+          <Link to="/">
+            <span className="text-4xl font-handwritten text-[#333] leading-tight">Sanare</span>
+          </Link>
+          <h1 className="text-3xl font-bold text-gray-900 mt-2">
+            Welcome, <span className="text-3xl font-bold">{patient?.firstname} {patient?.lastname}</span>
+          </h1>
+          <p className="text-sm text-gray-500">
+            Patient ID: {patient?.id || 'N/A'}
+          </p>
         </div>
-
-        <nav className="ml-6 hidden md:flex gap-6">
-          <a href="#" className="text-sm font-medium text-secondary hover:text-primary transition-colors">
-            Dashboard
-          </a>
-          <a href="#" className="text-sm font-medium text-muted-foreground hover:text-secondary transition-colors">
-            Journal
-          </a>
-          <a href="#" className="text-sm font-medium text-muted-foreground hover:text-secondary transition-colors">
-            Resources
-          </a>
-          <a href="#" className="text-sm font-medium text-muted-foreground hover:text-secondary transition-colors">
-            Messages
-          </a>
-        </nav>
-
-        <div className="ml-auto flex items-center gap-4">
-          <Button variant="ghost" size="icon" className="rounded-full">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="h-5 w-5"
-            >
-              <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path>
-              <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path>
-            </svg>
-            <span className="sr-only">Notifications</span>
-          </Button>
-
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="relative h-8 w-8 rounded-full">
-                <Avatar className="h-8 w-8">
-                  <AvatarImage src="/placeholder.svg?height=32&width=32" alt="Sarah Johnson" />
-                  <AvatarFallback>SJ</AvatarFallback>
-                </Avatar>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-56" align="end" forceMount>
-              <DropdownMenuLabel className="font-normal">
-                <div className="flex flex-col space-y-1">
-                  <p className="text-sm font-medium leading-none">Sarah Johnson</p>
-                  <p className="text-xs leading-none text-muted-foreground">sarah.johnson@example.com</p>
-                </div>
-              </DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem>Profile</DropdownMenuItem>
-              <DropdownMenuItem>Account Settings</DropdownMenuItem>
-              <DropdownMenuItem>Support</DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem>Log out</DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
+        <Button
+          variant="ghost"
+          className="ml-auto p-6 flex items-center justify-center"
+          onClick={() => { localStorage.removeItem('currentPatientId'); navigate('/'); }}
+          title="Sign out"
+          style={{ minWidth: 96, minHeight: 96 }}
+        >
+          <span className="sr-only">Sign out</span>
+          <LogOut style={{ width: '100%', height: '100%' }} className="text-[#D8B4F0] hover:text-[#B983D8] transition-colors drop-shadow-lg" />
+        </Button>
       </div>
     </header>
   )

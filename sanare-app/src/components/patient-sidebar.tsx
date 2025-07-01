@@ -31,9 +31,7 @@ export function PatientSidebar({ activeSection, onChangeSection }: PatientSideba
       className="w-64 p-4 transition-colors duration-500"
       style={{ backgroundColor: `${getSidebarColor()}20` }} // 20% opacity of the theme color
     >
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="font-medium text-gray-800">My Therapy</h2>
-      </div>
+
 
       <div className="space-y-2">
         <div
@@ -50,7 +48,7 @@ export function PatientSidebar({ activeSection, onChangeSection }: PatientSideba
             <Book className="h-4 w-4" />
           </div>
           <div>
-            <p className={`text-sm font-medium ${getTextColor("journal")}`}>My Journal</p>
+            <p className={`text-lg font-bold ${getTextColor("journal")}`}>My Journal</p>
             <p className={`text-xs ${activeSection === "journal" ? "text-white/70" : "text-gray-600"}`}>
               Private thoughts & reflections
             </p>
@@ -71,9 +69,9 @@ export function PatientSidebar({ activeSection, onChangeSection }: PatientSideba
             <FileText className="h-4 w-4" />
           </div>
           <div>
-            <p className={`text-sm font-medium ${getTextColor("notes")}`}>Session Notes</p>
+            <p className={`text-lg font-bold ${getTextColor("notes")}`}>Session Notes</p>
             <p className={`text-xs ${activeSection === "notes" ? "text-white/70" : "text-gray-600"}`}>
-              Notes shared by therapist
+              Notes shared by provider
             </p>
           </div>
         </div>
@@ -92,7 +90,7 @@ export function PatientSidebar({ activeSection, onChangeSection }: PatientSideba
             <Target className="h-4 w-4" />
           </div>
           <div>
-            <p className={`text-sm font-medium ${getTextColor("goals")}`}>My Goals</p>
+            <p className={`text-lg font-bold ${getTextColor("goals")}`}>My Goals</p>
             <p className={`text-xs ${activeSection === "goals" ? "text-white/70" : "text-gray-600"}`}>
               Track progress & achievements
             </p>
@@ -100,11 +98,13 @@ export function PatientSidebar({ activeSection, onChangeSection }: PatientSideba
         </div>
       </div>
 
+      {/*
       <div className="mt-8 p-3 bg-white/50 rounded-xl border border-white/20 shadow-sm">
         <p className="text-xs text-gray-600 mb-2">Next Session</p>
         <p className="text-sm font-medium text-gray-800">Thursday, May 9</p>
         <p className="text-xs text-gray-600">2:00 PM with Dr. Emily Chen</p>
       </div>
+      */}
     </div>
   )
 }

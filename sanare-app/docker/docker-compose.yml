@@ -9,28 +9,8 @@ services:
     ports:
       - '5432:5432'
     volumes:
+      - sanare-postgres-data:/var/lib/postgresql/data
       - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
-    networks:
-      - sanare-net
-
-  keycloak:
-    image: quay.io/keycloak/keycloak:24.0.2
-    container_name: sanare-keycloak
-    command: start-dev
-    restart: always
-    environment:
-      KEYCLOAK_ADMIN: admin
-      KEYCLOAK_ADMIN_PASSWORD: admin
-      KC_DB: postgres
-      KC_DB_URL: jdbc:postgresql://postgres:5432/keycloak
-      KC_DB_USERNAME: sanare
-      KC_DB_PASSWORD: sanarepass
-    ports:
-      - '8080:8080'
-    depends_on:
-      - postgres
-    volumes:
-      - ./keycloak/realm-config:/opt/keycloak/data/import
     networks:
       - sanare-net
 
@@ -44,16 +24,13 @@ services:
       DB_NAME: sanare_app
       DB_USER: sanare
       DB_PASSWORD: sanarepass
-      KEYCLOAK_URL: http://keycloak:8080
-      KEYCLOAK_REALM: sanare
-      KEYCLOAK_CLIENT_ID: sanare-app
-      KEYCLOAK_CLIENT_SECRET:
       PORT: 3001
+      NODE_ENV: development
+    command: sh -c "npx sequelize-cli db:migrate && npm run start"
     ports:
       - '3001:3001'
     depends_on:
       - postgres
-      - keycloak
     networks:
       - sanare-net
 
@@ -72,3 +49,6 @@ services:
 networks:
   sanare-net:
     driver: bridge
+
+volumes:
+  sanare-postgres-data:

@@ -14,7 +14,6 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Search, Bell, Mic, MicOff, LogOut } from "lucide-react"
 import { useState } from "react"
-import { useTherapist } from "@/lib/context/therapist-context"
 import { Link } from "react-router-dom"
 
 interface TherapistHeaderProps {
@@ -29,65 +28,41 @@ interface TherapistHeaderProps {
 export function TherapistHeader({ therapist }: TherapistHeaderProps) {
   const [isRecording, setIsRecording] = useState(false)
   const navigate = useNavigate()
-  const { logout } = useTherapist()
 
   const handleLogout = () => {
-    logout()
-    navigate('/therapist/login')
+    navigate('/')
   }
 
   const getInitials = () => {
-    return `${therapist.firstName[0]}${therapist.lastName[0]}`.toUpperCase()
+    const first = therapist.firstName && therapist.firstName.length > 0 ? therapist.firstName[0] : '';
+    const last = therapist.lastName && therapist.lastName.length > 0 ? therapist.lastName[0] : '';
+    return `${first}${last}`.toUpperCase() || '??';
   }
 
   return (
-    <header className="bg-white shadow">
-      <div className="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center">
-            <Link to="/" className="mr-6">
-              <h2 className="text-2xl font-handwritten text-[#D8B4F0]">Sanare</h2>
-            </Link>
-            <div>
-              <h1 className="text-xl font-medium text-gray-900">
-                Welcome, {therapist.firstName} {therapist.lastName}
-              </h1>
-              <p className="text-sm text-gray-500">
-                Therapist ID: {therapist.id}
-              </p>
-            </div>
-          </div>
-          
-          <div className="flex items-center space-x-4">
-            {/* Development mode - TODO: fix for Vite */}
-            {true && (
-              <div className="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm">
-                Demo Mode
-              </div>
-            )}
-            
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Avatar className="h-10 w-10 cursor-pointer">
-                  <AvatarFallback className="bg-[#D8B4F0] text-white">
-                    {getInitials()}
-                  </AvatarFallback>
-                </Avatar>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem>Profile</DropdownMenuItem>
-                <DropdownMenuItem>Settings</DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleLogout}>
-                  <LogOut className="h-4 w-4 mr-2" />
-                  Logout
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
+    <header className="bg-white shadow w-full">
+      <div className="flex flex-row items-center justify-between w-full px-6 py-4">
+        <div className="flex flex-col items-start">
+          <Link to="/">
+            <span className="text-4xl font-handwritten text-[#333] leading-tight">Sanare</span>
+          </Link>
+          <h1 className="text-3xl font-bold text-gray-900 mt-2">
+            Welcome, <span className="text-3xl font-bold">{therapist.firstName} {therapist.lastName}</span>
+          </h1>
+          <p className="text-sm text-gray-500">
+            Provider ID: {therapist.id}
+          </p>
         </div>
+        <Button
+          variant="ghost"
+          className="ml-auto p-6 flex items-center justify-center"
+          onClick={() => navigate('/')}
+          title="Sign out"
+          style={{ minWidth: 96, minHeight: 96 }}
+        >
+          <span className="sr-only">Sign out</span>
+          <LogOut style={{ width: '100%', height: '100%' }} className="text-[#D8B4F0] hover:text-[#B983D8] transition-colors drop-shadow-lg" />
+        </Button>
       </div>
     </header>
   )

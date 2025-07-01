@@ -1,3 +1,8 @@
+import { CollapsibleTrigger } from "@/components/ui/collapsible"
+import { ChevronUp, ChevronDown, MessageSquare, Calendar } from "lucide-react"
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible"
 "use client"
 
 import { useState } from "react"
@@ -5,10 +10,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { ChevronDown, ChevronUp, MessageSquare, Calendar, Edit, Trash2 } from "lucide-react"
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
+import { Edit, Trash2 } from "lucide-react"
 import { EditPatientNameModal } from "@/components/edit-patient-name-modal"
 import { ConfirmationModal } from "@/components/confirmation-modal"
 import { deletePatient } from "@/lib/api"
@@ -47,7 +49,8 @@ export function PatientInfo({ patientid, firstname, lastname, age, pronouns, ema
       if (onPatientDeleted) {
         onPatientDeleted()
       }
-      navigate('/')
+      // Only navigate if not already handled by parent
+      // navigate('/')
     } catch (error) {
       console.error('Error deleting patient:', error)
       // You might want to show an error toast here
@@ -64,14 +67,14 @@ export function PatientInfo({ patientid, firstname, lastname, age, pronouns, ema
             <div className="flex items-center gap-3">
               <Avatar className="h-12 w-12">
                 <AvatarImage src="/placeholder.svg?height=48&width=48" alt={`${currentFirstname} ${currentLastname}`} />
-                <AvatarFallback>{`${currentFirstname[0]}${currentLastname[0]}`}</AvatarFallback>
+                <AvatarFallback>{`${currentFirstname?.[0] || ''}${currentLastname?.[0] || ''}`}</AvatarFallback>
               </Avatar>
               <div>
-                <CardTitle className="text-xl font-serif">{`${currentFirstname} ${currentLastname}`}</CardTitle>
+                <CardTitle className="text-xl font-serif">{`${currentFirstname || ''} ${currentLastname || ''}`}</CardTitle>
                 <CardDescription>
                   {age && pronouns ? `${age} • ${pronouns}` : age ? `${age}` : pronouns ? pronouns : ""}
                 </CardDescription>
-                <div className="text-xs text-[#999] mt-1">Patient ID: {patientid}</div>
+                <div className="text-xs text-[#999] mt-1">Patient ID: {patientid || ''}</div>
                 {email && <div className="text-xs text-[#999]">Email: {email}</div>}
                 {phone && <div className="text-xs text-[#999]">Phone: {phone}</div>}
               </div>

@@ -5,19 +5,19 @@ import morgan from 'morgan';
 import dotenv from 'dotenv';
 import { sequelize } from './config/database';
 import routes from './routes';
-import { keycloakSession, keycloak } from './middleware/keycloak';
 
 // Load environment variables
 dotenv.config();
 
 const app = express();
 
-app.use(cors());
+app.use(cors({
+  origin: ['http://localhost:5173', 'http://localhost:3000'],
+  credentials: true
+}));
 app.use(helmet());
 app.use(morgan('dev'));
 app.use(express.json());
-app.use(keycloakSession);
-app.use(keycloak.middleware());
 
 app.use('/api', routes);
 

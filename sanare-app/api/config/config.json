@@ -1,0 +1,9 @@
+{
+  "development": {
+    "username": "sanare",
+    "password": "sanarepass",
+    "database": "sanare_app",
+    "host": "postgres",
+    "dialect": "postgres"
+  }
+}

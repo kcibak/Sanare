@@ -13,7 +13,9 @@ export class ProviderController {
       }
       const provider = await ProviderService.createProvider({ firstname, lastname, email, password });
       if (provider) {
-        res.status(201).json({ success: true });
+        // Return the created provider object for frontend use
+        const { providerid, firstname, lastname, email, createdat } = provider;
+        res.status(201).json({ provider: { providerid, firstname, lastname, email, createdat } });
       } else {
         res.status(500).json({ success: false, error: 'Provider creation failed' });
       }

@@ -9,19 +9,18 @@ import { PatientInfo } from "@/components/patient-info"
 import { PatientTimeline } from "@/components/patient-timeline"
 import { NoteTakingInterface } from "@/components/note-taking-interface"
 import { Clock } from "lucide-react"
-import { useTherapist } from "@/lib/context/therapist-context"
 import { useNavigate } from "react-router-dom"
+import { PatientSelection } from "@/components/patient-selection";
+import { TherapistInterface } from "@/components/therapist-interface";
+import { useTherapist } from '@/lib/context/therapist-context';
 
 export default function Dashboard() {
   const [sessionTime, setSessionTime] = useState(24)
-  const { therapist, isLoading } = useTherapist()
   const navigate = useNavigate()
+  const [selectedPatientId, setSelectedPatientId] = useState<string | null>(null)
 
-  useEffect(() => {
-    if (!isLoading && !therapist) {
-      navigate('/therapist/login')
-    }
-  }, [isLoading, therapist, navigate])
+  // Add a state to force PatientSelection reload
+  const [patientListKey, setPatientListKey] = useState(0);
 
   // Update session time
   useEffect(() => {
@@ -32,13 +31,22 @@ export default function Dashboard() {
     return () => clearInterval(timer)
   }, [])
 
-  if (isLoading) {
-    return <div className="min-h-screen flex items-center justify-center">Loading...</div>
-  }
+  const { therapist } = useTherapist();
+  useEffect(() => {
+    if (!therapist || !therapist.providerid) {
+      navigate('/therapist/login');
+    }
+  }, [therapist, navigate]);
 
-  if (!therapist) {
-    return <div className="min-h-screen flex items-center justify-center">No therapist found</div>
-  }
+  // Map therapist context fields to TherapistHeader props
+  const therapistHeaderProps = therapist && therapist.providerid
+    ? {
+        id: therapist.providerid,
+        firstName: therapist.firstname || '',
+        lastName: therapist.lastname || '',
+        email: therapist.email || '',
+      }
+    : { id: '', firstName: '', lastName: '', email: '' }
 
   // Create animated background shapes
   const shapes = [
@@ -47,8 +55,20 @@ export default function Dashboard() {
     { top: "80%", left: "15%", size: "w-20 h-20", delay: "1s" },
   ]
 
+  const handlePatientDeleted = () => {
+    setSelectedPatientId(null);
+    setPatientListKey((k) => k + 1); // force PatientSelection to reload
+  };
+
+  // Listen for the custom deselectPatient event
+  useEffect(() => {
+    const handleDeselect = () => setSelectedPatientId(null);
+    window.addEventListener('deselectPatient', handleDeselect);
+    return () => window.removeEventListener('deselectPatient', handleDeselect);
+  }, []);
+
   return (
-    <div className="min-h-screen flex flex-col bg-[#F4F1DE] relative overflow-hidden">
+    <div className="min-h-screen flex flex-col bg-[#FFB5D0] relative overflow-hidden">
       {/* Animated background shapes */}
       {shapes.map((shape, index) => (
         <div
@@ -63,71 +83,39 @@ export default function Dashboard() {
         />
       ))}
 
-      <TherapistHeader therapist={therapist} />
+      <TherapistHeader therapist={therapistHeaderProps} />
 
       <div className="flex-1 flex flex-col lg:flex-row p-4 gap-4 overflow-hidden">
-        {/* Left side - Notes area */}
-        <div className="flex-1 flex flex-col gap-4 min-w-0">
-          <Card className="flex-1 shadow-md overflow-hidden border-0 transition-all duration-300 hover:shadow-lg">
-            <CardContent className="p-0 h-full flex flex-col">
-              <Tabs defaultValue="session" className="flex flex-col h-full">
-                <div className="px-6 pt-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-2xl font-serif font-semibold text-secondary">Session Notes</h2>
-                    <TabsList className="grid grid-cols-3 w-[400px]">
-                      <TabsTrigger value="session" className="transition-all duration-200">
-                        Current
-                      </TabsTrigger>
-                      <TabsTrigger value="previous" className="transition-all duration-200">
-                        Previous
-                      </TabsTrigger>
-                      <TabsTrigger value="templates" className="transition-all duration-200">
-                        Templates
-                      </TabsTrigger>
-                    </TabsList>
-                  </div>
-                  <div className="flex items-center gap-2 mb-4">
-                    <Badge className="bg-primary hover:bg-primary/90">In Progress</Badge>
-                    <span className="text-sm text-muted-foreground flex items-center gap-1">
-                      <Clock className="h-3.5 w-3.5" />
-                      {sessionTime} min
-                    </span>
-                  </div>
-                </div>
-
-                <TabsContent value="session" className="flex-1 px-6 pb-6 overflow-hidden flex flex-col">
-                  <NoteTakingInterface />
-                </TabsContent>
-
-                <TabsContent value="previous" className="flex-1 px-6 pb-6 overflow-auto">
-                  <div className="space-y-4">
-                    <h3 className="text-lg font-medium">Previous Session Notes</h3>
-                    <p>Previous session notes will appear here.</p>
-                  </div>
-                </TabsContent>
-
-                <TabsContent value="templates" className="flex-1 px-6 pb-6 overflow-auto">
-                  <div className="space-y-4">
-                    <h3 className="text-lg font-medium">Note Templates</h3>
-                    <p>Your saved templates will appear here.</p>
-                  </div>
-                </TabsContent>
-              </Tabs>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Right side - Patient info */}
+        {/* Left panel: Patient list */}
         <div className="w-full lg:w-[350px] flex flex-col gap-4">
-          <PatientInfo 
-            patientId="1744937295964"
-            firstName="Sarah"
-            lastName="Johnson"
-            age={28}
-            pronouns="She/Her"
-          />
-          <PatientTimeline />
+          {therapist && therapist.providerid ? (
+            <PatientSelection
+              key={patientListKey}
+              onSelectPatient={setSelectedPatientId}
+              providerid={therapist.providerid}
+            />
+          ) : null}
         </div>
+
+        {/* Center panel: Main content */}
+        <div className="flex-1 flex flex-col gap-4 min-w-0">
+          {selectedPatientId ? (
+            <TherapistInterface
+              patientid={selectedPatientId}
+              onPatientDeleted={handlePatientDeleted}
+            />
+          ) : (
+            <div className="flex flex-col items-center justify-center h-full text-center text-[#555]">
+              <h2 className="text-2xl font-semibold mb-2">Welcome!</h2>
+              <p className="text-lg">Select a patient from the list to view or manage their information.</p>
+            </div>
+          )}
+        </div>
+
+        {/* Right panel: Quick actions/stats (optional, can be filled in later) */}
+        {/* <div className="w-full lg:w-[350px] flex flex-col gap-4">
+          // Quick actions or stats
+        </div> */}
       </div>
     </div>
   )

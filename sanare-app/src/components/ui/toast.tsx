@@ -32,6 +32,8 @@ const toastVariants = cva(
         default: "border bg-background text-foreground",
         destructive:
           "destructive group border-destructive bg-destructive text-destructive-foreground",
+        success:
+          "border-none bg-green-500/80 text-white shadow-md px-4 py-2 text-sm min-w-[120px] max-w-[180px] h-10 flex items-center justify-center rounded-lg backdrop-blur-sm",
       },
     },
     defaultVariants: {
@@ -94,7 +96,7 @@ const ToastTitle = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <ToastPrimitives.Title
     ref={ref}
-    className={cn("text-sm font-semibold", className)}
+    className={cn("text-sm font-semibold flex items-center gap-2", className)}
     {...props}
   />
 ))

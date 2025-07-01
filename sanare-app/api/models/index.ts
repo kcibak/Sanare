@@ -51,8 +51,9 @@ export class Patient extends Model {
   public firstname!: string;
   public lastname!: string;
   public providerid!: string;
-  public phone?: string;
   public email!: string;
+  public dob?: string;
+  public password?: string; // Added password field
   public createdat!: Date;
 }
 
@@ -81,16 +82,21 @@ Patient.init(
       },
       field: 'providerid',
     },
-    phone: {
-      type: DataTypes.STRING(20),
-      allowNull: true,
-      field: 'phone',
-    },
     email: {
       type: DataTypes.STRING(255),
       allowNull: false,
       unique: true,
       field: 'email',
+    },
+    dob: {
+      type: DataTypes.DATEONLY,
+      allowNull: true,
+      field: 'dob',
+    },
+    password: {
+      type: DataTypes.STRING(255),
+      allowNull: true, // Allow null for legacy patients
+      field: 'password',
     },
     createdat: {
       type: DataTypes.DATE,
@@ -109,44 +115,42 @@ Patient.init(
 export class Note extends Model {
   public noteid!: string;
   public patientid!: string;
-  public providerid!: string;
-  public content!: string;
-  public notetype!: 'private' | 'shared';
-  public sessionid?: string;
+  public notetitle?: string;
+  public notecontent?: string;
+  public sessiondate!: Date;
   public createdat!: Date;
+  public updatedat!: Date;
+  public isshared!: boolean;
+  public ack!: boolean;
+  public comments?: string;
 }
 
 Note.init(
   {
     noteid: {
-      type: DataTypes.STRING(32),
+      type: DataTypes.STRING(8),
       primaryKey: true,
       field: 'noteid',
     },
     patientid: {
-      type: DataTypes.STRING(32),
+      type: DataTypes.STRING(8),
       allowNull: false,
       field: 'patientid',
     },
-    providerid: {
-      type: DataTypes.STRING(8),
-      allowNull: false,
-      field: 'providerid',
-    },
-    content: {
-      type: DataTypes.TEXT,
-      allowNull: false,
-      field: 'content',
-    },
-    notetype: {
-      type: DataTypes.ENUM('private', 'shared'),
-      allowNull: false,
-      field: 'notetype',
-    },
-    sessionid: {
-      type: DataTypes.STRING(32),
+    notetitle: {
+      type: DataTypes.STRING(255),
       allowNull: true,
-      field: 'sessionid',
+      field: 'notetitle',
+    },
+    notecontent: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+      field: 'notecontent',
+    },
+    sessiondate: {
+      type: DataTypes.DATEONLY,
+      allowNull: false,
+      field: 'sessiondate',
     },
     createdat: {
       type: DataTypes.DATE,
@@ -154,10 +158,200 @@ Note.init(
       defaultValue: DataTypes.NOW,
       field: 'createdat',
     },
+    updatedat: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: DataTypes.NOW,
+      field: 'updatedat',
+    },
+    isshared: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
+      field: 'isshared',
+    },
+    ack: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
+      field: 'ack',
+    },
+    comments: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+      field: 'comments',
+    },
   },
   {
     sequelize,
-    tableName: 'note',
+    tableName: 'notes',
+    timestamps: false,
+  }
+);
+
+export class Journal extends Model {
+  public entryid!: string;
+  public patientid!: string;
+  public title!: string;
+  public content?: string;
+  public createdat!: Date;
+  public updatedat!: Date;
+}
+
+Journal.init(
+  {
+    entryid: {
+      type: DataTypes.STRING(8),
+      primaryKey: true,
+      field: 'entryid',
+    },
+    patientid: {
+      type: DataTypes.STRING(8),
+      allowNull: false,
+      field: 'patientid',
+    },
+    title: {
+      type: DataTypes.TEXT,
+      allowNull: false,
+      field: 'title',
+    },
+    content: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+      field: 'content',
+    },
+    createdat: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: DataTypes.NOW,
+      field: 'createdat',
+    },
+    updatedat: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: DataTypes.NOW,
+      field: 'updatedat',
+    },
+  },
+  {
+    sequelize,
+    tableName: 'journal',
+    timestamps: false,
+  }
+);
+
+export class Goal extends Model {
+  public goalid!: string;
+  public patientid!: string;
+  public title!: string;
+  public description?: string;
+  public iscomplete!: boolean;
+  public createdat!: Date;
+  public updatedat!: Date;
+  public completedat?: Date;
+}
+
+Goal.init(
+  {
+    goalid: {
+      type: DataTypes.STRING(8),
+      primaryKey: true,
+      field: 'goalid',
+    },
+    patientid: {
+      type: DataTypes.STRING(8),
+      allowNull: false,
+      field: 'patientid',
+    },
+    title: {
+      type: DataTypes.TEXT,
+      allowNull: false,
+      field: 'title',
+    },
+    description: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+      field: 'description',
+    },
+    iscomplete: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
+      field: 'iscomplete',
+    },
+    createdat: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: DataTypes.NOW,
+      field: 'createdat',
+    },
+    updatedat: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: DataTypes.NOW,
+      field: 'updatedat',
+    },
+    completedat: {
+      type: DataTypes.DATE,
+      allowNull: true,
+      field: 'completedat',
+    },
+  },
+  {
+    sequelize,
+    tableName: 'goals',
+    timestamps: false,
+  }
+);
+
+export class Task extends Model {
+  public taskid!: string;
+  public goalid?: string;
+  public title!: string;
+  public iscompleted!: boolean;
+  public createdat!: Date;
+  public updatedat!: Date;
+}
+
+Task.init(
+  {
+    taskid: {
+      type: DataTypes.STRING(8),
+      primaryKey: true,
+      field: 'taskid',
+    },
+    goalid: {
+      type: DataTypes.STRING(8),
+      allowNull: true, // allow orphan tasks
+      field: 'goalid',
+    },
+    title: {
+      type: DataTypes.TEXT,
+      allowNull: false,
+      field: 'title',
+    },
+    iscompleted: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
+      field: 'iscompleted',
+    },
+    createdat: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: DataTypes.NOW,
+      field: 'createdat',
+    },
+    updatedat: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: DataTypes.NOW,
+      field: 'updatedat',
+    },
+  },
+  {
+    sequelize,
+    tableName: 'tasks',
     timestamps: false,
   }
 );
@@ -166,5 +360,9 @@ Provider.hasMany(Patient, { foreignKey: 'providerid' });
 Patient.belongsTo(Provider, { foreignKey: 'providerid' });
 Patient.hasMany(Note, { foreignKey: 'patientid' });
 Note.belongsTo(Patient, { foreignKey: 'patientid' });
-Provider.hasMany(Note, { foreignKey: 'providerid' });
-Note.belongsTo(Provider, { foreignKey: 'providerid' });
+Patient.hasMany(Journal, { foreignKey: 'patientid' });
+Journal.belongsTo(Patient, { foreignKey: 'patientid' });
+Patient.hasMany(Goal, { foreignKey: 'patientid' });
+Goal.belongsTo(Patient, { foreignKey: 'patientid' });
+Goal.hasMany(Task, { foreignKey: 'goalid', as: 'tasks' });
+Task.belongsTo(Goal, { foreignKey: 'goalid', as: 'goal' });
