@@ -7,8 +7,9 @@
 ## 🚀 Live Demo
 
 👉 [**View the App on Netlify**](https://mysanare.netlify.app/)
+Log-in using the demo credentials provided on both provider and patient login pages.
 
-<!-- Replace YOUR_NETLIFY_LINK_HERE with your actual Netlify deployment link -->
+***Account creation features are disabled in this demonstration environment.***
 
 ---
 
