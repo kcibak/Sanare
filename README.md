@@ -1,5 +1,5 @@
 
-# 🧠 Sanare – TherapyNote Reimagined
+# Sanare
 
 **Sanare** is a modern, visual-first platform for therapists and patients to collaborate, track progress, and communicate more effectively. Designed for clarity and ease of use, Sanare helps bridge the gap between mental health care and technology.
 
