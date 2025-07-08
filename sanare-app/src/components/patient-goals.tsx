@@ -181,17 +181,18 @@ export function PatientGoals() {
 
   return (
     <div className="flex flex-col h-full overflow-x-hidden">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-2xl font-bold">My Goals</h2>
+      <div className="flex items-center mb-4 gap-2 pt-6">
+        <h2 className="text-2xl font-bold mr-2">My Goals</h2>
         <div className="relative group">
           <motion.button
-            className="p-3 rounded-full bg-[#9C27B0] text-white shadow-md flex items-center justify-center"
-            whileHover={{ scale: 1.15 }}
+            className="p-2 rounded-full bg-[#9C27B0] text-white shadow-md flex items-center justify-center"
+            whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.97 }}
             onClick={() => setShowNewGoal(!showNewGoal)}
             aria-label="Create Goal"
+            style={{ maxWidth: '40px', maxHeight: '40px', minWidth: '40px', minHeight: '40px', overflow: 'visible' }}
           >
-            <PlusCircle className="h-8 w-8" />
+            <PlusCircle className="h-6 w-6" />
           </motion.button>
           <span className="absolute left-1/2 -translate-x-1/2 mt-2 px-3 py-1 rounded bg-[#9C27B0] text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10">
             Create Goal

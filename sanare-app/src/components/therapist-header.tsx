@@ -55,13 +55,13 @@ export function TherapistHeader({ therapist }: TherapistHeaderProps) {
         </div>
         <Button
           variant="ghost"
-          className="ml-auto p-6 flex items-center justify-center"
+          className="ml-auto p-4 flex items-center justify-center"
           onClick={() => navigate('/')}
           title="Sign out"
-          style={{ minWidth: 96, minHeight: 96 }}
+          style={{ minWidth: 56, minHeight: 56 }}
         >
           <span className="sr-only">Sign out</span>
-          <LogOut style={{ width: '100%', height: '100%' }} className="text-[#D8B4F0] hover:text-[#B983D8] transition-colors drop-shadow-lg" />
+          <LogOut style={{ width: 28, height: 28 }} className="text-[#D8B4F0] hover:text-[#B983D8] transition-colors drop-shadow-lg" />
         </Button>
       </div>
     </header>
